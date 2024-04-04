@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS user
+CREATE TABLE IF NOT EXISTS users
 (
     username VARCHAR(50) PRIMARY KEY NOT NULL,
     email VARCHAR(50) NOT NULL,
@@ -21,14 +21,14 @@ CREATE TABLE IF NOT EXISTS ski_day
     FOREIGN KEY (mountain_name) REFERENCES mountain (mountain_name) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS mountain
+CREATE TABLE IF NOT EXISTS mountains
 (
     mountain_name VARCHAR(50) PRIMARY KEY NOT NULL,
     review_id INT NOT NULL,
     location VARCHAR(50)
 );
 
-CREATE TABLE IF NOT EXISTS mountain_to_review
+CREATE TABLE IF NOT EXISTS mountains_to_reviews
 (
     mountain_name VARCHAR(50),
     review_id INT NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS mountain_to_review
 );
 
 
-CREATE TABLE IF NOT EXISTS review
+CREATE TABLE IF NOT EXISTS reviews
 (
     review_id SERIAL PRIMARY KEY NOT NULL,
     description VARCHAR(400) NOT NULL,

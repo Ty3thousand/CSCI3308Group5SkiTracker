@@ -40,7 +40,7 @@ VALUES ('Aspen Snowmass', 'Colorado, USA', 1),
 ('Arai Snow Resort', 'Japan', 39),
 ('Valle Nevado', 'Chile', 40);
 
-insert into user (username, email, password) 
+insert into users (username, email, password) 
 values ('hhawksley0', 'hsiemianowicz0@blogspot.com', 'Eskilstuna'),
 ('ojarnell1', 'osille1@usa.gov', 'Baitashan'),
 ('dhackwell2', 'dbillinge2@oracle.com', 'Tikiw'),
@@ -49,7 +49,7 @@ values ('hhawksley0', 'hsiemianowicz0@blogspot.com', 'Eskilstuna'),
 ('rgant5', 'riannitti5@t-online.de', 'Xinshao'),
 ('fbeckhouse6', 'fdunge6@berkeley.edu', 'Zheleznodorozhnyy');
 
-INSERT INTO review (review_id, description, rating) 
+INSERT INTO reviews (review_id, description, rating) 
 VALUES (1, 'Fantastic skiing experience with breathtaking views.', 9),
 (2, 'Great snow conditions and excellent facilities.', 7),
 (3, 'Challenging terrain and friendly atmosphere.', 6),
@@ -131,7 +131,7 @@ VALUES (1, 'Fantastic skiing experience with breathtaking views.', 9),
 (79, 'Excellent dining options and après-ski activities.', 9),
 (80, 'Spectacular mountain views and pristine snow conditions.', 8);
 
-INSERT INTO mountain_to_review (mountain_name, review_id)
+INSERT INTO mountains_to_reviews (mountain_name, review_id)
 VALUES ('ASPEN SNOWMASS', 1),
 ('ASPEN SNOWMASS', 2),
 ('ARAPAHOE BASIN', 3),
