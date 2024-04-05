@@ -5,14 +5,6 @@ CREATE TABLE IF NOT EXISTS users
     password VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS reviews
-(
-    review_id SERIAL PRIMARY KEY NOT NULL,
-    description VARCHAR(400) NOT NULL,
-    rating DECIMAL NOT NULL
-);
-
-
 CREATE TABLE IF NOT EXISTS mountains
 (
     mountain_name VARCHAR(50) PRIMARY KEY NOT NULL,
