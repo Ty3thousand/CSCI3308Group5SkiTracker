@@ -1,16 +1,49 @@
 {{!-- Div for top three --}}
 <div>
-<p>Hello World</p>
+    <h1>Popular Reviews:</h1>
+
+<div class="card-group">
+{{#each data}}
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Review for {{this.mountain_name}}</h5>
+      <p class="card-text">{{this.description}}</p>
+      <p class="card-text"><small class="text-muted">Rating: {{this.rating}}/10</small></p>
+    </div>
+  </div>
+
+{{/each}}
 </div>
 
-{{!-- Div for nav bar --}}
-
-<div>
-<p>Hello World</p>
 </div>
 
 
 {{!-- Div for results --}}
 <div>
-<p>Hello World</p>
+    <br>
+<h1>Search for other mountain reviews!</h1>
+<form method="post" action="/reviews">
+  <div class="form-group">
+    <label for="mountain-search">Type the mountain you want to find reviews for here!</label>
+    <input class="form-control" id="mountainSearch" placeholder="Search for reviews by mountain here!" name="mountain">
+  
+  <button type="submit" class="btn btn-primary">Search</button>
+  </div>
+  </form>
+
+<div class="card-group">
+    
+{{#each searchResult}}
+
+  <div class="card">
+    <div class="card-body">
+      <h4 class="card-title">{{this.rating}}/10</h4>
+      <h5 class="card-title">{{this.mountain_name}}</h5>
+      <p class="card-text">{{this.description}}</p>
+      
+    </div>
+{{/each}}
+</div>
+
 </div>
