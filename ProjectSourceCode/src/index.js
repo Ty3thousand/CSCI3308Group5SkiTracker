@@ -74,6 +74,7 @@ app.use(
 // <!-- Section 4 : API Routes -->
 // *****************************************************
 
+
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
   res.redirect('/login'); //this will call the /anotherRoute route in the API
@@ -156,6 +157,35 @@ await db.one(query)
 app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
+
+app.get('/top3Users', (req, res) =>{
+  var q =`SELECT COUNT(*) FROM user_to_ski_day GROUP BY username ORDER BY username DESC LIMIT 3;`;
+  const TopUsers = 4;//RESULT HERE
+});
+  
+app.get('/userStatistics', (req, res) =>{
+  //query to get top speed of user
+  var query = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
+  //query to get number of days of user
+  var q2 = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
+  db.task('get-everything', task => {
+    return task.batch([task.any(query), task.any(q2)]);
+  })
+  .then(data => {
+    res.status(200).json({
+      query: data[0],
+      q2: data[1]
+    });
+  })
+  .catch(err => {
+    console.log(err);
+    res.status('400').json({
+      query: '',
+      q2: '',
+      error: err,
+    });
+  });
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
