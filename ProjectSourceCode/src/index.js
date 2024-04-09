@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part C.
+const { notStrictEqual } = require('assert');
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -157,6 +158,55 @@ app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
 
+app.get('/reviews', (req, res) =>{
+const getView = 'CREATE VIEW review_temp AS SELECT description, review_id, rating FROM reviews ORDER BY rating DESC LIMIT 3;';
+const getTop3 = 'SELECT mountain_name, description, rating FROM mountains_to_reviews, review_temp WHERE mountains_to_reviews.review_id=review_temp.review_id';
+const clearView = 'DROP VIEW review_temp';
+
+
+//Render page with the top three reviews (May update this to send all reviews and display in carousel style)
+
+db.task('get-everything', async task => {
+  return task.batch([
+    await task.any(getView), //query 1: Get the view
+    await task.any(getTop3), //query 2: Use the view
+    await task.any(clearView) //query 3: Clear the view so if page is refreshed there is no duplicate view
+  ]);
+})
+  .then(data => {
+    console.log(data);
+    res.render('pages/reviews', {data: data[1]})
+  })
+  .catch(err => {
+    console.log(err);
+  });
+});
+
+
+app.post('/reviews', (req, res)=>{
+  const query = 'WITH connection AS (SELECT * FROM reviews LEFT JOIN mountains_to_reviews ON reviews.review_id=mountains_to_reviews.review_id) SELECT description, mountain_name, rating FROM connection WHERE LOWER(mountain_name) LIKE LOWER($1) LIMIT 10';
+  const getView = 'CREATE VIEW review_temp AS SELECT description, review_id, rating FROM reviews ORDER BY rating DESC LIMIT 3;';
+  const getTop3 = 'SELECT mountain_name, description, rating FROM mountains_to_reviews, review_temp WHERE mountains_to_reviews.review_id=review_temp.review_id';
+  const clearView = 'DROP VIEW review_temp';
+
+    db.task('get-everything', async task =>{
+      return task.batch([
+        await task.any(getView), //query 1: Get the view
+        await task.any(getTop3), //query 2: Use the view
+        await task.any(clearView),
+        await task.any(query, req.body.mountain+'%')
+      ])
+    })
+  
+  .then(data =>{
+    console.log(data);
+    res.render('pages/reviews', {searchResult: data[3], data: data[1]})
+  })
+  .catch(err => {
+    console.log(err);
+  })
+
+});
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
