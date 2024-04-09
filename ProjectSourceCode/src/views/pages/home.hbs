@@ -1,4 +1,7 @@
 <style>
+    .lb_title {
+        text-align: center;
+    }
     .leaderboard {
         display: flex;
         justify-content: space-around;
@@ -6,51 +9,65 @@
     }
     .leaderboard-item {
         text-align: center;
-        width: 30%;
+        width: 20%;
         background-color: #f0f0f0;
         padding: 20px;
         border-radius: 10px;
+        position: relative; /* Add relative positioning */
     }
     .gold {
         background-color: gold;
+        z-index: 3; /* Ensure gold is on top */
+        right: -501px;
     }
     .silver {
         background-color: silver;
+        z-index: 2;
+        margin-top: 80px; /* Adjust position */
+        left: -501px;
     }
     .bronze {
         background-color: #cd7f32;
+        z-index: 1;
+        margin-top: 160px; /* Adjust position */
     }
     * {
-    box-sizing: border-box;
+        box-sizing: border-box;
     }
 
     body {
-    font-family: Arial, Helvetica, sans-serif;
+        font-family: Arial, Helvetica, sans-serif;
     }
 
-    /* Float four columns side by side */
     .column {
-    float: left;
-    width: 25%;
-    padding: 0 10px;
+        float: left;
+        width: 25%;
+        padding: 0 10px;
+        align-content: center;
     }
 
     /* Remove extra left and right margins, due to padding in columns */
-    .row {margin: 0 -5px;}
+    .row {
+        display: flex;
+        margin: 0 -5px;
+    }
 
     /* Clear floats after the columns */
     .row:after {
-    content: "";
-    display: table;
-    clear: both;
+        content: "";
+        display: table;
+        clear: both;
     }
 
     /* Style the counter cards */
     .card {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
-    padding: 16px;
-    text-align: center;
-    background-color: #f1f1f1;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
+        padding: 16px;
+        text-align: center;
+        background-color: #f1f1f1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     /* Responsive columns - one column layout (vertical) on small screens */
@@ -64,35 +81,44 @@
 </style>
 
 
-<h1>Top 3 Users</h1>
+<h1 class="lb_title">Top 3 Users</h1>
     <div class="leaderboard">
-        {{#each TopUsers}}
-            {{#if @index '===' 0}}
+        <!-- {{#each TopUsers}}
+            {{#if @index '===' 0}} -->
                 <div class="leaderboard-item gold">
-                    <h2>{{this.username}}</h2>
-                    <p>{{this.daysSkied}} days</p>
+                    <h2>u1</h2>
+                    <p>days</p>
                 </div>
-            {{else}}
-                {{#if @index '===' 1}}
+            <!-- {{else}}
+                {{#if @index '===' 1}} -->
                     <div class="leaderboard-item silver">
-                        <h2>{{this.username}}</h2>
-                        <p>{{this.daysSkied}} days</p>
+                        <h2>u2</h2>
+                        <p>days</p>
                 </div>
-                {{else}}
+                <!-- {{else}} -->
                     <div class="leaderboard-item bronze">
-                        <h2>{{this.username}}</h2>
-                        <p>{{this.daysSkied}} days</p>
+                        <h2>u3</h2>
+                        <p>days</p>
                     </div>
-                {{/if}}
+                <!-- {{/if}}
             {{/if}}
-        {{/each}}
+        {{/each}} -->
     </div>
 
 <div class="row">
   <div class="column">
-    <div class="card">Average:</div>
+    <div class="card">Average:
+        <p>Top Speed: </p>
+        <p>Days: </p>
+        <p>Favorite Mountain: </p>
+    </div>
+    
   </div>
   <div class="column">
-    <div class="card">You:</div>
+    <div class="card">You:
+        <p>Top Speed: </p>
+        <p>Days: </p>
+        <p>Favorite Mountain: </p>
+    </div>
   </div>
 </div>
