@@ -184,7 +184,7 @@ db.task('get-everything', async task => {
 
 
 app.post('/reviews', (req, res)=>{
-  const query = 'WITH connection AS (SELECT * FROM reviews LEFT JOIN mountains_to_reviews ON reviews.review_id=mountains_to_reviews.review_id) SELECT description, mountain_name, rating FROM connection WHERE mountain_name LIKE $1 LIMIT 10';
+  const query = 'WITH connection AS (SELECT * FROM reviews LEFT JOIN mountains_to_reviews ON reviews.review_id=mountains_to_reviews.review_id) SELECT description, mountain_name, rating FROM connection WHERE LOWER(mountain_name) LIKE LOWER($1) LIMIT 10';
   const getView = 'CREATE VIEW review_temp AS SELECT description, review_id, rating FROM reviews ORDER BY rating DESC LIMIT 3;';
   const getTop3 = 'SELECT mountain_name, description, rating FROM mountains_to_reviews, review_temp WHERE mountains_to_reviews.review_id=review_temp.review_id';
   const clearView = 'DROP VIEW review_temp';
