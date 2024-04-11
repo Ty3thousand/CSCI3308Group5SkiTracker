@@ -187,6 +187,32 @@ app.get('/userStatistics', (req, res) =>{
   });
 });
 
+app.get('/dbAverage', (req, res) => {
+  var q1 = 'SELECT AVG(top_speed) AS average_top_speed FROM ski_day;';
+  var q2 = 'SELECT AVG(days_skied) AS average_days_skied FROM users;';
+  var q3 = 'SELECT mountain_name FROM mountains_to_reviews ORDER BY COUNT(*) DESC LIMIT 1;';
+
+  db.task('get-averages-db', task => {
+    return task.batch([task.any(q1), task.any(q2), task.any(q3)]);
+  })
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      avg_ts: data[0],
+      avg_ds: data[1],
+      avg_favmnt: data[2],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+    res.status('400').json({
+      avg_ts: null,
+      avg_ds: null,
+      avg_favmnt: null,
+      error: err,
+    });
+  });
+});
 
 app.post('/reviews', (req, res)=>{
   const query = 'WITH connection AS (SELECT * FROM reviews LEFT JOIN mountains_to_reviews ON reviews.review_id=mountains_to_reviews.review_id) SELECT description, mountain_name, rating FROM connection WHERE LOWER(mountain_name) LIKE LOWER($1) LIMIT 10';
