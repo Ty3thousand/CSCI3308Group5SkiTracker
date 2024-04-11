@@ -150,7 +150,7 @@ await db.one(query)
   } else {
   req.session.user = user;
   req.session.save();
-  res.redirect('/discover');
+  res.redirect('/reviews');
   }
 });
 
