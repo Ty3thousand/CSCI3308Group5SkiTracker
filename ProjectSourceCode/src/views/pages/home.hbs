@@ -22,21 +22,24 @@
         background-color: #f0f0f0;
         padding: 20px;
         border-radius: 10px;
+        border-color: black;
+        border-style:solid;
+        border-width: 2px;
         position: relative; /* Add relative positioning */
     }
     .gold {
-        background-color: gold;
+        background-color:  #CFB53B;
         z-index: 3; /* Ensure gold is on top */
         right: -501px;
     }
     .silver {
-        background-color: silver;
+        background-color: lightgrey;
         z-index: 2;
         margin-top: 80px; /* Adjust position */
         left: -501px;
     }
     .bronze {
-        background-color: #cd7f32;
+        background-color: #bd7d3e;
         z-index: 1;
         margin-top: 160px; /* Adjust position */
     }
@@ -74,6 +77,7 @@
     }
 </style>
 
+{{!-- Leaderboard displaying the top 3 users based on days skied --}}
 <div class="top3main">
 <h1 class="lb_title">Top 3 Users</h1>
     <div class="leaderboard">
@@ -99,6 +103,8 @@
         {{/each}}
     </div>
 </div>
+
+{{!-- Cards displaying averages of users in DB and current logged in user's averages --}}
 <div class="row">
   <div class="column">
     <div class="card">Average:
