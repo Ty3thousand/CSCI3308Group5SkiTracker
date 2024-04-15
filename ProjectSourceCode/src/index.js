@@ -65,6 +65,8 @@ app.use(
   })
 );
 
+app.use(express.static('src/resources/'))
+
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -87,7 +89,7 @@ res.render('pages/register');
 app.post('/register', async (req, res) => {
 //hash the password using bcrypt library
 const hash = await bcrypt.hash(req.body.password, 10);
-var query = `INSERT INTO users (username, email , password) VALUES ('${req.body.username}', '${req.body.email}', '${hash}') returning *;`;
+var query = `INSERT INTO users (username, email, password) VALUES ('${req.body.username}', '${req.body.email}','${hash}') returning *;`;
 db.task('post-everything', task => {
   return task.batch([task.any(query)]);
 })
