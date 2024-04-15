@@ -1,24 +1,25 @@
-{{!-- Div for top three --}}
 <div>
     <h1>Popular Reviews:</h1>
 
-<div class="card-group">
+<div id="carousel" class="carousel slide" data-bs-theme="dark" data-bs-ride="carousel" >
+    <div class="carousel-inner">  
+          <div class="carousel-item active" data-bs-interval="1">
+    </div>
 {{#each data}}
 
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Review for {{this.mountain_name}}</h5>
-      <p class="card-text">{{this.description}}</p>
-      <p class="card-text"><small class="text-muted">Rating: {{this.rating}}/10</small></p>
+
+    <div class="carousel-item" data-bs-interval="5000">
+        <h3>{{this.mountain_name}}</h3>
+        <h5>{{this.rating}}/10</h5>
+        <p>{{this.description}}</p>
     </div>
-  </div>
 
 {{/each}}
 </div>
-
+</div>
 </div>
 
-
+</div>
 {{!-- Div for results --}}
 <div>
     <br>
