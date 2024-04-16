@@ -158,6 +158,10 @@ app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
 
+app.get('/home', (req, res) => {
+  res.render('/pages/home');
+});
+
 app.get('/top3Users', (req, res) =>{
   var q =`SELECT COUNT(*) FROM user_to_ski_day GROUP BY username ORDER BY username DESC LIMIT 3;`;
   const TopUsers = 4;//RESULT HERE
