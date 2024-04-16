@@ -74,6 +74,11 @@ app.use(
 // *****************************************************
 // <!-- Section 4 : API Routes -->
 // *****************************************************
+const user = {
+  username: undefined,
+  email: undefined,
+  password: undefined,
+};
 
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
@@ -111,17 +116,19 @@ res.render('pages/login');
 // Login
 app.post('/login', async (req, res) => {
 // check if password from request matches with password in DB
-const query = `SELECT username, password FROM "users" WHERE username = '${req.body.username}';`;
-let user;
+const query = `SELECT username, password, email FROM "users" WHERE username = '${req.body.username}';`;
+let usernam;
 let password;
 //let match;
 await db.one(query)
   .then((data) => {
-    
-    user = data.username;
+    user.password = req.body.password;
+    user.email = data.email;
+    user.username = req.body.username;
+    usernam = data.username;
     password = data.password;
 
-    if (user === undefined || user === '' || password === undefined || password === '') {
+    if (usernam === undefined || usernam === '' || password === undefined || password === '') {
       res.render('pages/register', {
         error: true,
         message: 'User Undefined'
@@ -152,6 +159,14 @@ await db.one(query)
   req.session.save();
   res.redirect('/reviews');
   }
+});
+
+app.get('/profile', (req, res) => {
+  res.render('pages/profile', {
+    username: req.session.user.username,
+    email: req.session.user.email,
+    password: req.session.user.password,
+  });
 });
 
 app.get('/welcome', (req, res) => {
