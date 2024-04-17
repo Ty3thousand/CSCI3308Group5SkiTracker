@@ -171,6 +171,54 @@ app.get('/profile', (req, res) => {
   });
 });
 
+app.post('/profile', async (req, res) => {
+  try {
+    // Hash the password using bcrypt library
+    const hash = await bcrypt.hash(req.body.password, 10);
+    
+    // Update user information in the database
+    const query = `
+      UPDATE users 
+      SET username = '${req.body.username}', 
+          email = '${req.body.email}', 
+          password = '${hash}' 
+      WHERE username = '${user.username}' 
+      RETURNING *
+    `;
+    
+    // Execute the update query
+    const data = await db.one(query);
+    
+    // If the user is found
+    if (data) {
+      const user = {
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password
+      };
+      
+      req.session.user = user;
+      req.session.save();
+      
+      res.redirect('/profile');
+    } else {
+      // If user is undefined, render error page
+      res.render('pages/register', {
+        error: true,
+        message: 'User Undefined'
+      });
+    }
+  } catch (err) {
+    // If an error occurs during query execution, render error page
+    res.render('pages/profile', { error: true, message: err.message });
+  }
+});
+
+  
+  app.get('/login', (req, res) => {
+  res.render('pages/login');
+  });
+
 app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
@@ -192,7 +240,7 @@ db.task('get-everything', async task => {
 })
   .then(data => {
     console.log(data);
-    res.render('pages/reviews', {data: data[1]})
+    res.render('pages/reviews', {data: data[1], username: req.session.user.username,})
   })
   .catch(err => {
     console.log(err);
