@@ -84,19 +84,19 @@
         {{#each TopUsers}}
             {{#if @index '===' 0}}
                 <div class="leaderboard-item gold">
-                    <h2>u1</h2>
-                    <p>days</p>
+                    <h2>{{TopUsers[0][0]}}</h2>
+                    <p>{{TopUsers[0][1]}}</p>
                 </div>
             {{else}}
                 {{#if @index '===' 1}}
                     <div class="leaderboard-item silver">
-                        <h2>u2</h2>
-                        <p>days</p>
+                        <h2>{{TopUsers[1][0]}}</h2>
+                        <p>{{TopUsers[1][1]}}</p>
                 </div>
                 {{else}}
                     <div class="leaderboard-item bronze">
-                        <h2>u3</h2> 
-                        <p>days</p>
+                        <h2>{{TopUsers[2][0]}}</h2>
+                        <p>{{TopUsers[2][1]}}</p>
                     </div>
                 {{/if}}
             {{/if}}
