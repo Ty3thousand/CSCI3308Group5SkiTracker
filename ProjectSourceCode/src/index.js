@@ -65,6 +65,8 @@ app.use(
   })
 );
 
+app.use(express.static('src/resources/'))
+
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -74,6 +76,23 @@ app.use(
 // *****************************************************
 // <!-- Section 4 : API Routes -->
 // *****************************************************
+const user = {
+  username: undefined,
+  email: undefined,
+  password: undefined,
+};
+
+//Authentication Middleware
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login');
+  }
+  next();
+};
+
+
+
 
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
@@ -87,7 +106,7 @@ res.render('pages/register');
 app.post('/register', async (req, res) => {
 //hash the password using bcrypt library
 const hash = await bcrypt.hash(req.body.password, 10);
-var query = `INSERT INTO users (username, email , password) VALUES ('${req.body.username}', '${req.body.email}', '${hash}') returning *;`;
+var query = `INSERT INTO users (username, email, password) VALUES ('${req.body.username}', '${req.body.email}','${hash}') returning *;`;
 db.task('post-everything', task => {
   return task.batch([task.any(query)]);
 })
@@ -111,17 +130,19 @@ res.render('pages/login');
 // Login
 app.post('/login', async (req, res) => {
 // check if password from request matches with password in DB
-const query = `SELECT username, password FROM "users" WHERE username = '${req.body.username}';`;
-let user;
+const query = `SELECT username, password, email FROM "users" WHERE username = '${req.body.username}';`;
+let usernam;
 let password;
 //let match;
 await db.one(query)
   .then((data) => {
-    
-    user = data.username;
+    user.password = req.body.password;
+    user.email = data.email;
+    user.username = req.body.username;
+    usernam = data.username;
     password = data.password;
 
-    if (user === undefined || user === '' || password === undefined || password === '') {
+    if (usernam === undefined || usernam === '' || password === undefined || password === '') {
       res.render('pages/register', {
         error: true,
         message: 'User Undefined'
@@ -154,6 +175,70 @@ await db.one(query)
   }
 });
 
+
+//Put all page routes below this app.use. This will verify that the user is logged in before sending them to the page.
+app.use(auth);
+
+
+
+
+
+app.get('/profile', (req, res) => {
+  res.render('pages/profile', {
+    username: req.session.user.username,
+    email: req.session.user.email,
+    password: req.session.user.password,
+  });
+});
+
+app.post('/profile', async (req, res) => {
+  try {
+    // Hash the password using bcrypt library
+    const hash = await bcrypt.hash(req.body.password, 10);
+    
+    // Update user information in the database
+    const query = `
+      UPDATE users 
+      SET username = '${req.body.username}', 
+          email = '${req.body.email}', 
+          password = '${hash}' 
+      WHERE username = '${user.username}' 
+      RETURNING *
+    `;
+    
+    // Execute the update query
+    const data = await db.one(query);
+    
+    // If the user is found
+    if (data) {
+      const user = {
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password
+      };
+      
+      req.session.user = user;
+      req.session.save();
+      
+      res.redirect('/profile');
+    } else {
+      // If user is undefined, render error page
+      res.render('pages/register', {
+        error: true,
+        message: 'User Undefined'
+      });
+    }
+  } catch (err) {
+    // If an error occurs during query execution, render error page
+    res.render('pages/profile', { error: true, message: err.message });
+  }
+});
+
+  
+  app.get('/login', (req, res) => {
+  res.render('pages/login');
+  });
+
 app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
@@ -175,7 +260,7 @@ db.task('get-everything', async task => {
 })
   .then(data => {
     console.log(data);
-    res.render('pages/reviews', {data: data[1]})
+    res.render('pages/reviews', {data: data[1], username: req.session.user.username,})
   })
   .catch(err => {
     console.log(err);
@@ -208,17 +293,91 @@ app.post('/reviews', (req, res)=>{
 
 });
 
+/*app.get('/top3Users', (req, res) =>{
+  const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC;`;
+  db.any(TopUsers)
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      TopUsers: data[0],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+    res.status('400').json({
+      TopUsers: null,
+      error: err,
+    });
+  });
+});*/
+
+app.get('/homepage', (req, res) =>{
+  const userTopSpeed = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
+  const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC LIMIT 3;`
+  const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
+  const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${req.body.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
+  var q1 = 'SELECT AVG(top_speed) AS average_top_speed FROM ski_day;';
+  var q2 = 'SELECT AVG(days_skied) AS average_days_skied FROM users;';
+  var q3 = 'SELECT mountain_name FROM mountains_to_reviews ORDER BY COUNT(*) DESC LIMIT 1;';
+
+  db.task('get-everything', task=>{
+    return task.batch([task.any(userTopSpeed), task.any(TopUsers), task.any(daysSkied), task.any(user_favmnt), task.any(q1), task.any(q2), task.any(q3)]);
+  })
+
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      userTopSpeed: data[0],
+      TopUsers: data[1],
+      daysSkied: data[2],
+      user_favmnt: data[3],
+      avg_ts: data[4],
+      avg_ds: data[5],
+      avg_favmnt: data[6],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  })
+
+});
+
+/*app.get('/userStatistics', (req, res) =>{
+  //query to get top speed of user
+  var query = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
+  
+  //query to get number of days of user
+  var q2 = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
+  db.task('get-everything', task => {
+    return task.batch([task.any(query), task.any(q2)]);
+  })
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      query: data[0],
+      q2: data[1],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+    res.status('400').json({
+      query: '',
+      q2: '',
+      error: err,
+    });
+  });
+});*/
 
 // inserting mountain, top speed, review from stats
 app.post('/stats', (req, res) => {
   const { mountain, topSpeed, reviewOption, reviewText, rating } = req.body;
-
-  // send message if required info are not filled out
+  // Check if all required fields are present
   if (!mountain || !topSpeed || !reviewOption) {
     return res.status(400).send('All fields are required.');
   }
 
   // Initialize variables for review-related database operations
+
   let reviewId = null;
   let insertReviewPromise = Promise.resolve();
 
@@ -252,6 +411,22 @@ app.post('/stats', (req, res) => {
     })
     .then(() => {
       // Respond with a confirmation message or redirect the user to another page
+
+//       // Insert new ski day into ski_day 
+//       return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, topSpeed]);
+//     })
+//     .then(() => {
+//       // If reviewId is not null, insert mountain into mountains_to_reviews
+//       if (reviewId) {
+//         return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
+//       }
+//       return null;
+//     })
+//     .then(() => {
+//       // Insert user and ski day association into user_to_ski_day 
+//       return db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, (SELECT ski_day_id FROM ski_day WHERE mountain_name = $2 ORDER BY ski_day_id DESC LIMIT 1))', [req.session.user, mountain]);
+//     })
+//     .then(() => {
       res.send('Your statistics have been submitted successfully.');
     })
     .catch(error => {

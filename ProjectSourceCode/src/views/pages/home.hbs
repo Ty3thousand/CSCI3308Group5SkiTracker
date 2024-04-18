@@ -1,0 +1,124 @@
+<style>
+    .top3main {
+        border-color: black;
+        border-style: solid;
+        border-width: 3px;
+    }
+    .lb_title {
+        text-align: center;
+        border-style: double;
+        border-width: 5px;
+        border-color: black ;
+    }
+    .leaderboard {
+        display: flex;
+        justify-content: space-around;
+        padding-bottom: 40px;
+        padding-top: 40px;
+    }
+    .leaderboard-item {
+        text-align: center;
+        width: 20%;
+        background-color: #f0f0f0;
+        padding: 20px;
+        border-radius: 10px;
+        border-color: black;
+        border-style:solid;
+        border-width: 2px;
+        position: relative; /* Add relative positioning */
+    }
+    .gold {
+        background-color:  #CFB53B;
+        z-index: 3; /* Ensure gold is on top */
+        right: -501px;
+    }
+    .silver {
+        background-color: lightgrey;
+        z-index: 2;
+        margin-top: 80px; /* Adjust position */
+        left: -501px;
+    }
+    .bronze {
+        background-color: #bd7d3e;
+        z-index: 1;
+        margin-top: 160px; /* Adjust position */
+    }
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .column {
+        float: left;
+        width: 25%;
+        padding: 0 10px;
+    }
+
+    /* Remove extra left and right margins, due to padding in columns */
+    .row {
+        display: flex;
+        margin: 0 -5px;
+        padding-top: 40px;
+    }
+
+    /* Clear floats after the columns */
+
+    /* Style the counter cards */
+    .card {
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
+        padding: 16px;
+        text-align: center;
+        background-color: #f1f1f1;
+        display: flex;
+        left: calc(105%);
+    }
+</style>
+
+{{!-- Leaderboard displaying the top 3 users based on days skied --}}
+<div class="top3main">
+<h1 class="lb_title">Top 3 Users</h1>
+    <div class="leaderboard">
+        {{#each TopUsers}}
+            {{#if @index '===' 0}}
+                <div class="leaderboard-item gold">
+                    <h2>{{TopUsers[0][0]}}</h2>
+                    <p>{{TopUsers[0][1]}}</p>
+                </div>
+            {{else}}
+                {{#if @index '===' 1}}
+                    <div class="leaderboard-item silver">
+                        <h2>{{TopUsers[1][0]}}</h2>
+                        <p>{{TopUsers[1][1]}}</p>
+                </div>
+                {{else}}
+                    <div class="leaderboard-item bronze">
+                        <h2>{{TopUsers[2][0]}}</h2>
+                        <p>{{TopUsers[2][1]}}</p>
+                    </div>
+                {{/if}}
+            {{/if}}
+        {{/each}}
+    </div>
+</div>
+
+{{!-- Cards displaying averages of users in DB and current logged in user's averages --}}
+<div class="row">
+  <div class="column">
+    <div class="card">Average:
+        <p>Top Speed: {{avg_ts}}</p>
+        <p>Days: {{avg_ds}}</p>
+        <p>Favorite Mountain: {{avg_favmnt}}</p>
+    </div>
+    
+  </div>
+  <div class="column">
+    <div class="card">{{userTopSpeed[0]}}:
+        <p>Top Speed: {{userTopSpeed[1]}}</p>
+        <p>Days: {{daysSkied}}</p>
+        <p>Favorite Mountain: {{user_favmnt}}</p>
+    </div>
+  </div>
+</div>

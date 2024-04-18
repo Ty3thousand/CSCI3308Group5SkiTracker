@@ -40,14 +40,14 @@ VALUES ('Aspen Snowmass', 'Colorado, USA', 1),
 ('Arai Snow Resort', 'Japan', 39),
 ('Valle Nevado', 'Chile', 40);
 
-insert into users (username, email, password) 
-values ('hhawksley0', 'hsiemianowicz0@blogspot.com', 'Eskilstuna'),
-('ojarnell1', 'osille1@usa.gov', 'Baitashan'),
-('dhackwell2', 'dbillinge2@oracle.com', 'Tikiw'),
-('ckelland3', 'chaxell3@upenn.edu', 'Singajaya'),
-('efontaine4', 'emaseres4@statcounter.com', 'Magugu'),
-('rgant5', 'riannitti5@t-online.de', 'Xinshao'),
-('fbeckhouse6', 'fdunge6@berkeley.edu', 'Zheleznodorozhnyy');
+insert into users (username, email, password, days_skied) 
+values ('hhawksley0', 'hsiemianowicz0@blogspot.com', 'Eskilstuna', 4),
+('ojarnell1', 'osille1@usa.gov', 'Baitashan', 4),
+('dhackwell2', 'dbillinge2@oracle.com', 'Tikiw', 4),
+('ckelland3', 'chaxell3@upenn.edu', 'Singajaya', 4),
+('efontaine4', 'emaseres4@statcounter.com', 'Magugu', 4),
+('rgant5', 'riannitti5@t-online.de', 'Xinshao', 4),
+('fbeckhouse6', 'fdunge6@berkeley.edu', 'Zheleznodorozhnyy', 4);
 
 INSERT INTO reviews (review_id, description, rating) 
 VALUES (1, 'Fantastic skiing experience with breathtaking views.', 9),
