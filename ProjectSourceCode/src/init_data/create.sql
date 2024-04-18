@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS users
 (
     username VARCHAR(50) PRIMARY KEY NOT NULL,
     email VARCHAR(50) NOT NULL,
+    password VARCHAR(500) NOT NULL,
     days_skied INT NOT NULL
-    password VARCHAR(500) NOT NULL
 );
 
 DROP TABLE IF EXISTS reviews CASCADE;
