@@ -106,7 +106,7 @@ res.render('pages/register');
 app.post('/register', async (req, res) => {
 //hash the password using bcrypt library
 const hash = await bcrypt.hash(req.body.password, 10);
-var query = `INSERT INTO users (username, email, password) VALUES ('${req.body.username}', '${req.body.email}','${hash}') returning *;`;
+var query = `INSERT INTO users (username, email, password, days_skied) VALUES ('${req.body.username}', '${req.body.email}','${hash}', 0) returning *;`;
 db.task('post-everything', task => {
   return task.batch([task.any(query)]);
 })
@@ -311,24 +311,34 @@ app.post('/reviews', (req, res)=>{
   });
 });*/
 
-app.get('/homepage', (req, res) =>{
+app.get('/home', (req, res) =>{
   const userTopSpeed = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
   const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC LIMIT 3;`
   const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
   const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${req.body.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
-  var q1 = 'SELECT AVG(top_speed) AS average_top_speed FROM ski_day;';
-  var q2 = 'SELECT AVG(days_skied) AS average_days_skied FROM users;';
-  var q3 = 'SELECT mountain_name FROM mountains_to_reviews ORDER BY COUNT(*) DESC LIMIT 1;';
+  const avg_ts = 'SELECT AVG(top_speed) AS average_top_speed FROM ski_day;';
+  const avg_ds = 'SELECT AVG(days_skied) AS average_days_skied FROM users;';
+  const avg_favmnt = 'SELECT mountain_name FROM mountains_to_reviews GROUP BY mountain_name ORDER BY COUNT(*) DESC LIMIT 1;';
 
-  db.task('get-everything', task=>{
-    return task.batch([task.any(userTopSpeed), task.any(TopUsers), task.any(daysSkied), task.any(user_favmnt), task.any(q1), task.any(q2), task.any(q3)]);
+  db.task('get-everything', async task=>{
+    return task.batch([
+      await task.any(userTopSpeed), 
+      await task.any(TopUsers), 
+      await task.any(daysSkied), 
+      await task.any(user_favmnt), 
+      await task.any(avg_ts), 
+      await task.any(avg_ds), 
+      await task.any(avg_favmnt)]);
   })
 
   .then(data => {
     console.log(data);
     res.render('pages/home', {
-      userTopSpeed: data[0],
-      TopUsers: data[1],
+      current_user_name: data[0][0],
+      current_user_ts: data[0][1],
+      u1: data[1][0],
+      u2: data[1][1],
+      u3: data[1][2],
       daysSkied: data[2],
       user_favmnt: data[3],
       avg_ts: data[4],
