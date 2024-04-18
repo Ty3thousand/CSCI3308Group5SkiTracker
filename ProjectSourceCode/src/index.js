@@ -210,8 +210,7 @@ app.post('/reviews', (req, res)=>{
 
 });
 
-app.get('/top3Users', (req, res) =>{
-  //var q =`SELECT COUNT(*) FROM user_to_ski_day GROUP BY username ORDER BY username DESC LIMIT 3;`;
+/*app.get('/top3Users', (req, res) =>{
   const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC;`;
   db.any(TopUsers)
   .then(data => {
@@ -227,11 +226,43 @@ app.get('/top3Users', (req, res) =>{
       error: err,
     });
   });
+});*/
+
+app.get('/homepage', (req, res) =>{
+  const userTopSpeed = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
+  const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC LIMIT 3;`
+  const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
+  const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${req.body.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
+  var q1 = 'SELECT AVG(top_speed) AS average_top_speed FROM ski_day;';
+  var q2 = 'SELECT AVG(days_skied) AS average_days_skied FROM users;';
+  var q3 = 'SELECT mountain_name FROM mountains_to_reviews ORDER BY COUNT(*) DESC LIMIT 1;';
+
+  db.task('get-everything', task=>{
+    return task.batch([task.any(userTopSpeed), task.any(TopUsers), task.any(daysSkied), task.any(user_favmnt), task.any(q1), task.any(q2), task.any(q3)]);
+  })
+
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      userTopSpeed: data[0],
+      TopUsers: data[1],
+      daysSkied: data[2],
+      user_favmnt: data[3],
+      avg_ts: data[4],
+      avg_ds: data[5],
+      avg_favmnt: data[6],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  })
+
 });
 
-app.get('/userStatistics', (req, res) =>{
+/*app.get('/userStatistics', (req, res) =>{
   //query to get top speed of user
   var query = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
+  
   //query to get number of days of user
   var q2 = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
   db.task('get-everything', task => {
@@ -252,7 +283,7 @@ app.get('/userStatistics', (req, res) =>{
       error: err,
     });
   });
-});
+});*/
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
