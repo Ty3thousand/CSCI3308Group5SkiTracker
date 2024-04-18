@@ -82,6 +82,17 @@ const user = {
   password: undefined,
 };
 
+//Authentication Middleware
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login');
+  }
+  next();
+};
+
+
+
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
   res.redirect('/login'); //this will call the /anotherRoute route in the API
@@ -162,6 +173,14 @@ await db.one(query)
   res.redirect('/reviews');
   }
 });
+
+
+//Put all page routes below this app.use. This will verify that the user is logged in before sending them to the page.
+app.use(auth);
+
+
+
+
 
 app.get('/profile', (req, res) => {
   res.render('pages/profile', {
