@@ -368,6 +368,56 @@ app.get('/homepage', (req, res) =>{
   });
 });*/
 
+app.post('/stats', (req, res) => {
+  const { mountain, topSpeed, reviewOption, reviewText, rating } = req.body;
+
+  // Check if all required fields are present
+  if (!mountain || !topSpeed || !reviewOption) {
+    return res.status(400).send('All fields are required.');
+  }
+
+  let reviewId = null;
+  let insertReviewPromise = Promise.resolve();
+
+  // If reviewOption is 'yes', insert review into the reviews table
+  if (reviewOption === 'yes' && reviewText && rating) {
+    insertReviewPromise = db.one('INSERT INTO reviews (description, rating) VALUES ($1, $2) RETURNING review_id', [reviewText, rating])
+      .then(data => {
+        reviewId = data.review_id;
+      })
+      .catch(error => {
+        console.error('Error inserting review:', error);
+        throw new Error('An error occurred while submitting your statistics.');
+      });
+  }
+
+  // Execute promises sequentially
+  insertReviewPromise
+    .then(() => {
+      // Insert new ski day into ski_day 
+      return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, topSpeed]);
+    })
+    .then(() => {
+      // If reviewId is not null, insert mountain into mountains_to_reviews
+      if (reviewId) {
+        return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
+      }
+      return null;
+    })
+    .then(() => {
+      // Insert user and ski day association into user_to_ski_day 
+      return db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, (SELECT ski_day_id FROM ski_day WHERE mountain_name = $2 ORDER BY ski_day_id DESC LIMIT 1))', [req.session.user, mountain]);
+    })
+    .then(() => {
+      res.send('Your statistics have been submitted successfully.');
+    })
+    .catch(error => {
+      console.error('Error:', error.message || error);
+      res.status(500).send(error.message || 'An error occurred while submitting your statistics.');
+    });
+});
+
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
