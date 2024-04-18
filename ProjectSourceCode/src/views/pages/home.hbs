@@ -108,17 +108,21 @@
 <div class="row">
   <div class="column">
     <div class="card">Average:
-        <p>Top Speed: {{avg_ts}}</p>
-        <p>Days: {{avg_ds.average_days_skied}}</p>
+        <p>Top Speed: {{avg_ts.round}}</p>
+        <p>Days: {{avg_ds.round}}</p>
         <p>Favorite Mountain: {{avg_favmnt.mountain_name}}</p>
     </div>
     
   </div>
   <div class="column">
-    <div class="card">{{current_user_name}}:
-        <p>Top Speed: {{current_user_ts}}</p>
+    <div class="card">{{username}}:
+        {{#if user_ts.max}}
+        <p>Top Speed: {{user_ts.max}}</p>
+        {{else}}
+        <p>Top Speed: No Data</p>
+        {{/if}}
         <p>Days: {{daysSkied.count}}</p>
-        <p>Favorite Mountain: {{user_favmnt}}</p>
+        <p>Favorite Mountain: {{user_favmnt.mountain_name}}</p>
     </div>
   </div>
 </div>

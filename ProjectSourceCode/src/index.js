@@ -312,12 +312,12 @@ app.post('/reviews', (req, res)=>{
 });*/
 
 app.get('/home', (req, res) =>{
-  const userTopSpeed = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
+  const userTopSpeed = `SELECT MAX(sd.top_speed) FROM users u JOIN user_to_ski_day usd ON u.username = usd.username JOIN ski_day sd ON usd.ski_day_id = sd.ski_day_id WHERE u.username = '${req.body.username}';`;
   const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC LIMIT 3;`
   const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
   const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${req.body.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
-  const avg_ts = 'SELECT AVG(top_speed) AS average_top_speed FROM ski_day;';
-  const avg_ds = 'SELECT AVG(days_skied) AS average_days_skied FROM users;';
+  const avg_ts = 'SELECT ROUND(AVG(top_speed), 2) FROM ski_day;';
+  const avg_ds = 'SELECT ROUND(AVG(days_skied), 2) FROM users;';
   const avg_favmnt = 'SELECT mountain_name FROM mountains_to_reviews GROUP BY mountain_name ORDER BY COUNT(*) DESC LIMIT 1;';
 
   db.task('get-everything', async task=>{
@@ -334,16 +334,16 @@ app.get('/home', (req, res) =>{
   .then(data => {
     console.log(data);
     res.render('pages/home', {
-      current_user_name: data[0][0],
-      current_user_ts: data[0][1],
+      username: req.session.user.username,
+      user_ts: data[0][0],
       u1: data[1][0],
       u2: data[1][1],
       u3: data[1][2],
-      daysSkied: data[2],
-      user_favmnt: data[3],
-      avg_ts: data[4],
-      avg_ds: data[5],
-      avg_favmnt: data[6],
+      daysSkied: data[2][0],
+      user_favmnt: data[3][0],
+      avg_ts: data[4][0],
+      avg_ds: data[5][0],
+      avg_favmnt: data[6][0],
     });
   })
   .catch(err => {
