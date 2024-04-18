@@ -207,6 +207,60 @@ app.post('/reviews', (req, res)=>{
   })
 
 });
+
+
+// inserting mountain, top speed, review from stats
+app.post('/stats', (req, res) => {
+  const { mountain, topSpeed, reviewOption, reviewText, rating } = req.body;
+
+  // send message if required info are not filled out
+  if (!mountain || !topSpeed || !reviewOption) {
+    return res.status(400).send('All fields are required.');
+  }
+
+  // Initialize variables for review-related database operations
+  let reviewId = null;
+  let insertReviewPromise = Promise.resolve();
+
+  // If reviewOption is 'yes', insert review into the reviews table
+  if (reviewOption === 'yes' && reviewText && rating) {
+    insertReviewPromise = db.one('INSERT INTO reviews (description, rating) VALUES ($1, $2) RETURNING review_id', [reviewText, rating])
+      .then(data => {
+        reviewId = data.review_id;
+      })
+      .catch(error => {
+        console.error('Error inserting review:', error);
+        throw new Error('An error occurred while submitting your review.');
+      });
+  }
+
+  // Execute promises sequentially
+  insertReviewPromise
+    .then(() => {
+      if (reviewId) {    // If reviewId is not null, insert mountain into mountains_to_reviews 
+        return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
+      }
+      return null;    // Otherwise just return with null
+    })
+    .then(() => {
+      // Insert ski day info into ski_day table
+      return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, topSpeed])
+    })
+    .then(() => {
+      // Insert user and ski day association into user_to_ski_day table
+      return db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, (SELECT ski_day_id FROM ski_day WHERE mountain_name = $2))', [req.session.user, mountain]);
+    })
+    .then(() => {
+      // Respond with a confirmation message or redirect the user to another page
+      res.send('Your statistics have been submitted successfully.');
+    })
+    .catch(error => {
+      console.error('Error:', error.message || error);
+      res.status(500).send(error.message || 'An error occurred while submitting your review.');
+    });
+});
+
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
