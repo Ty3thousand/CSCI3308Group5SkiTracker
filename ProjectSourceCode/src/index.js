@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part C.
+const { notStrictEqual } = require('assert');
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -64,6 +65,8 @@ app.use(
   })
 );
 
+app.use(express.static('src/resources/'))
+
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -73,6 +76,22 @@ app.use(
 // *****************************************************
 // <!-- Section 4 : API Routes -->
 // *****************************************************
+const user = {
+  username: undefined,
+  email: undefined,
+  password: undefined,
+};
+
+//Authentication Middleware
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login');
+  }
+  next();
+};
+
+
 
 
 // TODO - Include your API routes here
@@ -87,7 +106,7 @@ res.render('pages/register');
 app.post('/register', async (req, res) => {
 //hash the password using bcrypt library
 const hash = await bcrypt.hash(req.body.password, 10);
-var query = `INSERT INTO users (username, password) VALUES ('${req.body.username}', '${hash}') returning *;`;
+var query = `INSERT INTO users (username, email, password) VALUES ('${req.body.username}', '${req.body.email}','${hash}') returning *;`;
 db.task('post-everything', task => {
   return task.batch([task.any(query)]);
 })
@@ -111,17 +130,19 @@ res.render('pages/login');
 // Login
 app.post('/login', async (req, res) => {
 // check if password from request matches with password in DB
-const query = `SELECT username, password FROM "users" WHERE username = '${req.body.username}';`;
-let user;
+const query = `SELECT username, password, email FROM "users" WHERE username = '${req.body.username}';`;
+let usernam;
 let password;
 //let match;
 await db.one(query)
   .then((data) => {
-    
-    user = data.username;
+    user.password = req.body.password;
+    user.email = data.email;
+    user.username = req.body.username;
+    usernam = data.username;
     password = data.password;
 
-    if (user === undefined || user === '' || password === undefined || password === '') {
+    if (usernam === undefined || usernam === '' || password === undefined || password === '') {
       res.render('pages/register', {
         error: true,
         message: 'User Undefined'
@@ -150,44 +171,106 @@ await db.one(query)
   } else {
   req.session.user = user;
   req.session.save();
-  res.redirect('/discover');
+  res.redirect('/reviews');
   }
 });
+
+
+//Put all page routes below this app.use. This will verify that the user is logged in before sending them to the page.
+app.use(auth);
+
+
+
+
+
+app.get('/profile', (req, res) => {
+  res.render('pages/profile', {
+    username: req.session.user.username,
+    email: req.session.user.email,
+    password: req.session.user.password,
+  });
+});
+
+app.post('/profile', async (req, res) => {
+  try {
+    // Hash the password using bcrypt library
+    const hash = await bcrypt.hash(req.body.password, 10);
+    
+    // Update user information in the database
+    const query = `
+      UPDATE users 
+      SET username = '${req.body.username}', 
+          email = '${req.body.email}', 
+          password = '${hash}' 
+      WHERE username = '${user.username}' 
+      RETURNING *
+    `;
+    
+    // Execute the update query
+    const data = await db.one(query);
+    
+    // If the user is found
+    if (data) {
+      const user = {
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password
+      };
+      
+      req.session.user = user;
+      req.session.save();
+      
+      res.redirect('/profile');
+    } else {
+      // If user is undefined, render error page
+      res.render('pages/register', {
+        error: true,
+        message: 'User Undefined'
+      });
+    }
+  } catch (err) {
+    // If an error occurs during query execution, render error page
+    res.render('pages/profile', { error: true, message: err.message });
+  }
+});
+
+  
+  app.get('/login', (req, res) => {
+  res.render('pages/login');
+  });
 
 app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
 
-// app.get('/dbAverage', (req, res) => {
-//   var q1 = 'SELECT AVG(top_speed) AS average_top_speed FROM ski_day;';
-//   var q2 = 'SELECT AVG(days_skied) AS average_days_skied FROM users;';
-//   var q3 = 'SELECT mountain_name FROM mountains_to_reviews ORDER BY COUNT(*) DESC LIMIT 1;';
+app.get('/reviews', (req, res) =>{
+const getView = 'CREATE VIEW review_temp AS SELECT description, review_id, rating FROM reviews ORDER BY rating DESC;';
+const getTop3 = 'SELECT mountain_name, description, rating FROM mountains_to_reviews, review_temp WHERE mountains_to_reviews.review_id=review_temp.review_id';
+const clearView = 'DROP VIEW review_temp';
 
-//   db.task('get-averages-db', task => {
-//     return task.batch([task.any(q1), task.any(q2), task.any(q3)]);
-//   })
-//   .then(data => {
-//     console.log(data);
-//     res.render('pages/home', {
-//       avg_ts: data[0],
-//       avg_ds: data[1],
-//       avg_favmnt: data[2],
-//     });
-//   })
-//   .catch(err => {
-//     console.log(err);
-//     res.status('400').json({
-//       avg_ts: null,
-//       avg_ds: null,
-//       avg_favmnt: null,
-//       error: err,
-//     });
-//   });
-// });
+
+//Render page with the top three reviews (May update this to send all reviews and display in carousel style)
+
+db.task('get-everything', async task => {
+  return task.batch([
+    await task.any(getView), //query 1: Get the view
+    await task.any(getTop3), //query 2: Use the view
+    await task.any(clearView) //query 3: Clear the view so if page is refreshed there is no duplicate view
+  ]);
+})
+  .then(data => {
+    console.log(data);
+    res.render('pages/reviews', {data: data[1], username: req.session.user.username,})
+  })
+  .catch(err => {
+    console.log(err);
+  });
+});
+
 
 app.post('/reviews', (req, res)=>{
   const query = 'WITH connection AS (SELECT * FROM reviews LEFT JOIN mountains_to_reviews ON reviews.review_id=mountains_to_reviews.review_id) SELECT description, mountain_name, rating FROM connection WHERE LOWER(mountain_name) LIKE LOWER($1) LIMIT 10';
-  const getView = 'CREATE VIEW review_temp AS SELECT description, review_id, rating FROM reviews ORDER BY rating DESC LIMIT 3;';
+  const getView = 'CREATE VIEW review_temp AS SELECT description, review_id, rating FROM reviews ORDER BY rating DESC;';
   const getTop3 = 'SELECT mountain_name, description, rating FROM mountains_to_reviews, review_temp WHERE mountains_to_reviews.review_id=review_temp.review_id';
   const clearView = 'DROP VIEW review_temp';
 
