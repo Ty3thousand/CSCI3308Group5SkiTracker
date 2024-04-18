@@ -25,3 +25,13 @@ The SkiTracker is an application that presents information to the user about ski
   <li>Must have Docker Installed</li>
   <li>Must have Postgres Installed</li>
 </ul>
+<h2>How to run locally: </h2>
+<ul>
+After downloading the code do the following:
+  <li>Make sure docker is open and has no running containers</li>
+  <li>Open a terminal</li>
+  <li>Set the directory to 'ProjectSourceCode'</li>
+  <li>Run the following: docker compose up -d</li>
+  <li>Open your browser and search: 'localhost:3000'</li>
+  <li>Enjoy!</li>
+</ul>
