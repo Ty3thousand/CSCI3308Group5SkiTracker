@@ -1,4 +1,3 @@
-
 // Register password validation function
 function check() {
     var input = document.getElementById('password_confirm');
@@ -10,15 +9,14 @@ function check() {
     }
 }
 
+// //Logout button pop up
+// const logoutButton = document.getElementById('logoutButton');
 
-//Logout button pop up
-const logoutButton = document.getElementById('logoutButton');
+// logoutButton.addEventListener('click', () => {
+//     const isConfirmed = confirm('Are you sure you want to logout?');
 
-logoutButton.addEventListener('click', () => {
-    const isConfirmed = confirm('Are you sure you want to logout?');
-
-    if (isConfirmed) {
-        window.location.href = '/login';
-        alert('Logged out successfully!'); 
-    }
-});
+//     if (isConfirmed) {
+//         window.location.href = '/login';
+//         alert('Logged out successfully!'); 
+//     }
+// });

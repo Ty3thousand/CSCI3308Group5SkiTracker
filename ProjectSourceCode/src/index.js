@@ -272,6 +272,12 @@ app.post('/reviews', (req, res)=>{
   })
 
 });
+
+//logout api
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.render("pages/login",{ message: "Logged Out!" });  
+});
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
