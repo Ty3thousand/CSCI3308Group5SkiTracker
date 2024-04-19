@@ -1,0 +1,181 @@
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <style>
+    .show {display: block;}
+    .hidden {
+        display: none;
+      }
+
+    .rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+    }
+
+    .rating > input{ display:none;}
+
+    .rating > label {
+      position: relative;
+        width: 1em;
+        font-size: 2vw;
+        color: #FFD600;
+        cursor: pointer;
+    }
+    .rating > label::before{ 
+      content: "\2605";
+      position: absolute;
+      opacity: 0;
+    }
+    .rating > label:hover:before,
+    .rating > label:hover ~ label:before {
+      opacity: 1 !important;
+    }
+
+    .rating > input:checked ~ label:before{
+      opacity:1;
+    }
+
+    .rating:hover > input:checked ~ label:before{ opacity: 0.4; }
+
+
+  </style>
+</head>
+
+<body class="h-100 d-flex flex-column">
+    <!-- stats -->
+  <h3>Your Statistics</h3>
+
+  <div class="d-grid gap-2 col-6 mx-auto">
+      <button id="showFormBtn" class="btn btn-secondary btn-lg btn-block">Add Statistics</button>
+      <form action="/stats" method="POST" class="hidden" id="myForm" style="background-color: rgb(255, 255, 255); padding: 30px; ">
+          <div class="form-group" style="padding-left: 13px;">
+            <label for="mountain" >Mountain:</label>
+            <select id="mountain" name="mountain" required>
+              <option value="">Select a mountain...</option>
+              <option value="Aspen Snowmass">Aspen Snowmass</option>
+              <option value="Arapahoe Basin">Arapahoe Basin</option>
+              <option value="Jackson Hole Mountain Resort">Jackson Hole Mountain Resort</option>
+              <option value="Big Sky Resort">Big Sky Resort</option>
+              <option value="Sun Valley">Sun Valley</option>
+              <option value="Killington-Pico">Killington-Pico</option>
+              <option value="Windham Mountain Club">Windham Mountain Club</option>
+              <option value="The Highlands">The Highlands</option>
+              <option value="Boyne Mountain">Boyne Mountain</option>
+              <option value="Alyeska Resort">Alyeska Resort</option>
+              <option value="The Summit at Snoqualmie">The Summit at Snoqualmie</option>
+              <option value="Mt. Bachelor">Mt. Bachelor</option>
+              <option value="SkiBig3">SkiBig3</option>
+              <option value="Revelstoke Mountain Resort">Revelstoke Mountain Resort</option>
+              <option value="Cypress Mountain">Cypress Mountain</option>
+              <option value="Red Mountain">Red Mountain</option>
+              <option value="Panorama">Panorama</option>
+              <option value="Sun Peaks Resort">Sun Peaks Resort</option>
+              <option value="Sunday River">Sunday River</option>
+              <option value="Sugarloaf">Sugarloaf</option>
+              <option value="Loon Mountain">Loon Mountain</option>
+              <option value="Taos Ski Valley">Taos Ski Valley</option>
+              <option value="Deer Valley Resort">Deer Valley Resort</option>
+              <option value="Brighton">Brighton</option>
+              <option value="Alta Ski Area">Alta Ski Area</option>
+              <option value="Snowbird">Snowbird</option>
+              <option value="Snowbasin">Snowbasin</option>
+              <option value="Camelback Resort">Camelback Resort</option>
+              <option value="Blue Mountain Resort">Blue Mountain Resort</option>
+              <option value="Chamonix Mont-Blanc Valley">Chamonix Mont-Blanc Valley</option>
+              <option value="Dolomiti Superski">Dolomiti Superski</option>
+              <option value="Grandvalira Resorts">Grandvalira Resorts</option>
+              <option value="Kitzbühel">Kitzbühel</option>
+              <option value="Zermatt Matterhorn">Zermatt Matterhorn</option>
+              <option value="Thredbo">Thredbo</option>
+              <option value="Mt Buller">Mt Buller</option>
+              <option value="Coronet Peak, The Remarkables & Mt Hutt">Coronet Peak, The Remarkables & Mt Hutt</option>
+              <option value="Niseko United">Niseko United</option>
+              <option value="Arai Snow Resort">Arai Snow Resort</option>
+              <option value="Valle Nevado">Valle Nevado</option>
+            </select>
+          </div>
+
+          <br>
+          <div class="form-control" style="border: none;">
+            <label for="top_speed">Top speed:</label>
+            <input type="text" id="top_speed" name="top_speed" required size="5px">
+          </div>
+
+          <div class="form-control" style="border: none; padding-top: 20px;">
+            <label for="reviews">Review:</label>
+            <select id="reviewOption" name="reviewOption" required>
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select><br>
+            <textarea style="margin: 10px;" id="reviewText" name="reviewText" rows="4" cols="74" class="hidden" placeholder="Write your review..."></textarea><br>
+            <div class="hidden" id="rate">
+              <label>Rating:</label>
+              <div class="rating" id="rating">
+                <input type="radio" name="rating" value="10" id="10"><label for="10">☆</label>
+                <input type="radio" name="rating" value="9" id="9"><label for="9">☆</label>
+                <input type="radio" name="rating" value="8" id="8"><label for="8">☆</label>
+                <input type="radio" name="rating" value="7" id="7"><label for="7">☆</label>
+                <input type="radio" name="rating" value="6" id="6"><label for="6">☆</label>
+                <input type="radio" name="rating" value="5" id="5"><label for="5">☆</label>
+                <input type="radio" name="rating" value="4" id="4"><label for="4">☆</label>
+                <input type="radio" name="rating" value="3" id="3"><label for="3">☆</label>
+                <input type="radio" name="rating" value="2" id="2"><label for="2">☆</label>
+                <input type="radio" name="rating" value="1" id="1"><label for="1">☆</label>
+              </div>
+            </div>
+            
+
+          </div>
+
+          <button type="button" class="btn btn-primary" aria-label="Close" id="close-form">Close</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+  </div>
+    
+  <script>
+    document.getElementById('showFormBtn').addEventListener('click', function() {
+      document.getElementById('myForm').classList.remove('hidden');
+    });
+
+
+    document.getElementById('close-form').addEventListener('click', function() {
+      document.getElementById('myForm').classList.add('hidden');
+    });
+
+    $('#reviewOption').change(function() {
+          var reviewOption = $(this).val();
+          if (reviewOption === 'yes') {
+              $('#reviewText').removeClass('hidden');
+              $('#rate').removeClass('hidden');
+          } else {
+              $('#reviewText').addClass('hidden');
+              $('#rate').addClass('hidden');
+          }
+      });
+
+    // Function to handle form submission
+    function submitForm() {
+      var formData = $('#myForm').serialize();
+
+      // Send a POST request to the /stats endpoint
+      $.post('/stats', formData)
+        .done(function(response) {
+          alert(response);
+
+          $('#myForm').addClass('hidden'); // hide form when done
+        })
+        .fail(function(error) {
+          alert('An error occurred: ' + error.responseText);
+        });
+    }
+
+    $('#myForm').submit(function(event) {
+      // Prevent the default form submission behavior
+      event.preventDefault();
+      submitForm();
+    });
+  </script>
+  
+</body>

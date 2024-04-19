@@ -1,9 +1,11 @@
+
 DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE IF NOT EXISTS users
 (
     username VARCHAR(50) PRIMARY KEY NOT NULL,
     email VARCHAR(50) NOT NULL,
-    password VARCHAR(500) NOT NULL
+    password VARCHAR(500) NOT NULL,
+    days_skied INT NOT NULL
 );
 
 DROP TABLE IF EXISTS reviews CASCADE;
@@ -48,3 +50,4 @@ CREATE TABLE IF NOT EXISTS mountains_to_reviews
     FOREIGN KEY (mountain_name) REFERENCES mountains (mountain_name) ON DELETE CASCADE,
     FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
+
