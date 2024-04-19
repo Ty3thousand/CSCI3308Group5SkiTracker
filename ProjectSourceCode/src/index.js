@@ -378,18 +378,24 @@ app.get('/home', (req, res) =>{
   });
 });*/
 
-// inserting mountain, top speed, review from stats
+
+app.get('/stats', (req, res) => {
+  res.render('pages/stats');
+  });
+  
+
 app.post('/stats', (req, res) => {
-  const { mountain, topSpeed, reviewOption, reviewText, rating } = req.body;
+  const { mountain, top_speed, reviewOption, reviewText, rating } = req.body;
+  console.error('Error', mountain, top_speed, reviewOption, reviewText, rating);
   // Check if all required fields are present
-  if (!mountain || !topSpeed || !reviewOption) {
+  if (!mountain || !top_speed || !reviewOption) {
     return res.status(400).send('All fields are required.');
   }
 
   // Initialize variables for review-related database operations
-
   let reviewId = null;
   let insertReviewPromise = Promise.resolve();
+  let skiday_id = null;
 
   // If reviewOption is 'yes', insert review into the reviews table
   if (reviewOption === 'yes' && reviewText && rating) {
@@ -406,6 +412,21 @@ app.post('/stats', (req, res) => {
   // Execute promises sequentially
   insertReviewPromise
     .then(() => {
+      // Insert user and ski day association into user_to_ski_day table
+      return db.any(`SELECT ski_day_id FROM ski_day WHERE mountain_name = '${mountain}';`)
+        .then(data => {
+          console.log(data)
+          if (data.length > 0) {
+            skiday_id = data[0].ski_day_id; // Assigning the ski_day_id from the first result
+          } else {
+            throw new Error('Ski day not found for the specified mountain.');
+          }
+        })
+        .then(() => {
+          return db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, $2)', [req.session.user.username, skiday_id]);
+        });
+    })
+    .then(() => {
       if (reviewId) {    // If reviewId is not null, insert mountain into mountains_to_reviews 
         return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
       }
@@ -413,37 +434,18 @@ app.post('/stats', (req, res) => {
     })
     .then(() => {
       // Insert ski day info into ski_day table
-      return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, topSpeed])
-    })
-    .then(() => {
-      // Insert user and ski day association into user_to_ski_day table
-      return db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, (SELECT ski_day_id FROM ski_day WHERE mountain_name = $2))', [req.session.user, mountain]);
+      return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, top_speed]);
     })
     .then(() => {
       // Respond with a confirmation message or redirect the user to another page
-
-//       // Insert new ski day into ski_day 
-//       return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, topSpeed]);
-//     })
-//     .then(() => {
-//       // If reviewId is not null, insert mountain into mountains_to_reviews
-//       if (reviewId) {
-//         return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
-//       }
-//       return null;
-//     })
-//     .then(() => {
-//       // Insert user and ski day association into user_to_ski_day 
-//       return db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, (SELECT ski_day_id FROM ski_day WHERE mountain_name = $2 ORDER BY ski_day_id DESC LIMIT 1))', [req.session.user, mountain]);
-//     })
-//     .then(() => {
       res.send('Your statistics have been submitted successfully.');
     })
     .catch(error => {
       console.error('Error:', error.message || error);
-      res.status(500).send(error.message || 'An error occurred while submitting your review.');
+      res.status(500).send(error.message || 'An error occurred while submitting.');
     });
 });
+
 
 
 // *****************************************************

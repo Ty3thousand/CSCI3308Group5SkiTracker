@@ -1,4 +1,7 @@
 <head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
   <style>
     .show {display: block;}
     .hidden {
@@ -49,7 +52,7 @@
       <form action="/stats" method="POST" class="hidden" id="myForm" style="background-color: rgb(255, 255, 255); padding: 30px; ">
           <div class="form-group" style="padding-left: 13px;">
             <label for="mountain" >Mountain:</label>
-            <select id="mountain" required>
+            <select id="mountain" name="mountain" required>
               <option value="">Select a mountain...</option>
               <option value="Aspen Snowmass">Aspen Snowmass</option>
               <option value="Arapahoe Basin">Arapahoe Basin</option>
@@ -96,8 +99,8 @@
 
           <br>
           <div class="form-control" style="border: none;">
-            <label for="top-speed">Top speed:</label>
-            <input type="text" id="top-speed" name="top-speed" required size="5px">
+            <label for="top_speed">Top speed:</label>
+            <input type="text" id="top_speed" name="top_speed" required size="5px">
           </div>
 
           <div class="form-control" style="border: none; padding-top: 20px;">
