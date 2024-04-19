@@ -293,6 +293,12 @@ app.post('/reviews', (req, res)=>{
 
 });
 
+//logout api
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.render("pages/login",{ message: "Logged Out!" });  
+});
+
 /*app.get('/top3Users', (req, res) =>{
   const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC;`;
   db.any(TopUsers)
@@ -445,8 +451,6 @@ app.post('/stats', (req, res) => {
       res.status(500).send(error.message || 'An error occurred while submitting.');
     });
 });
-
-
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
