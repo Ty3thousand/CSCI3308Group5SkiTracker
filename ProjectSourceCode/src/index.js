@@ -385,10 +385,10 @@ app.get('/stats', (req, res) => {
   
 
 app.post('/stats', (req, res) => {
-  const { mountain, top_speed, reviewOption, reviewText, rating } = req.body;
-  console.error('Error', mountain, top_speed, reviewOption, reviewText, rating);
+  const {mountain, top_speed, reviewOption, reviewText, rating, daysSkied} = req.body;
+  console.error('Error', mountain, top_speed, reviewOption, reviewText, rating, daysSkied);
   // Check if all required fields are present
-  if (!mountain || !top_speed || !reviewOption) {
+  if (!mountain || !top_speed || !reviewOption || !daysSkied) {
     return res.status(400).send('All fields are required.');
   }
 
@@ -437,6 +437,10 @@ app.post('/stats', (req, res) => {
       return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, top_speed]);
     })
     .then(() => {
+      // Update the days_skied for the user
+      return db.none('UPDATE users SET days_skied = days_skied + $1 WHERE username = $2', [daysSkied, req.session.user.username]);
+    })
+    .then(() => {
       // Respond with a confirmation message or redirect the user to another page
       res.send('Your statistics have been submitted successfully.');
     })
@@ -446,6 +450,9 @@ app.post('/stats', (req, res) => {
     });
 });
 
+app.get('/logout', (req, res) => {
+  res.render('pages/login');
+  });
 
 
 // *****************************************************
