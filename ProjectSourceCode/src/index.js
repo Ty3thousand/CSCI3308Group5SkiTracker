@@ -82,6 +82,18 @@ const user = {
   password: undefined,
 };
 
+//Authentication Middleware
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login');
+  }
+  next();
+};
+
+
+
+
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
   res.redirect('/login'); //this will call the /anotherRoute route in the API
@@ -94,7 +106,7 @@ res.render('pages/register');
 app.post('/register', async (req, res) => {
 //hash the password using bcrypt library
 const hash = await bcrypt.hash(req.body.password, 10);
-var query = `INSERT INTO users (username, email, password) VALUES ('${req.body.username}', '${req.body.email}','${hash}') returning *;`;
+var query = `INSERT INTO users (username, email, password, days_skied) VALUES ('${req.body.username}', '${req.body.email}','${hash}', 0) returning *;`;
 db.task('post-everything', task => {
   return task.batch([task.any(query)]);
 })
@@ -162,6 +174,14 @@ await db.one(query)
   res.redirect('/reviews');
   }
 });
+
+
+//Put all page routes below this app.use. This will verify that the user is logged in before sending them to the page.
+app.use(auth);
+
+
+
+
 
 app.get('/profile', (req, res) => {
   res.render('pages/profile', {
@@ -272,6 +292,132 @@ app.post('/reviews', (req, res)=>{
   })
 
 });
+
+//logout api
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.render("pages/login",{ message: "Logged Out!" });  
+});
+
+/*app.get('/top3Users', (req, res) =>{
+  const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC;`;
+  db.any(TopUsers)
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      TopUsers: data[0],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+    res.status('400').json({
+      TopUsers: null,
+      error: err,
+    });
+  });
+});*/
+
+app.get('/home', (req, res) =>{
+  const userTopSpeed = `SELECT MAX(sd.top_speed) FROM users u JOIN user_to_ski_day usd ON u.username = usd.username JOIN ski_day sd ON usd.ski_day_id = sd.ski_day_id WHERE u.username = '${user.username}';`;
+  const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC LIMIT 3;`
+  const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${user.username}') AS x;`;
+  const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${user.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
+  const avg_ts = 'SELECT ROUND(AVG(top_speed), 2) FROM ski_day;';
+  const avg_ds = 'SELECT ROUND(AVG(days_skied), 2) FROM users;';
+  const avg_favmnt = 'SELECT mountain_name FROM mountains_to_reviews GROUP BY mountain_name ORDER BY COUNT(*) DESC LIMIT 1;';
+
+  db.task('get-everything', async task=>{
+    return task.batch([
+      await task.any(userTopSpeed), 
+      await task.any(TopUsers), 
+      await task.any(daysSkied), 
+      await task.any(user_favmnt), 
+      await task.any(avg_ts), 
+      await task.any(avg_ds), 
+      await task.any(avg_favmnt)]);
+  })
+
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      username: req.session.user.username,
+      user_ts: data[0][0],
+      u1: data[1][0],
+      u2: data[1][1],
+      u3: data[1][2],
+      daysSkied: data[2][0],
+      user_favmnt: data[3][0],
+      avg_ts: data[4][0],
+      avg_ds: data[5][0],
+      avg_favmnt: data[6][0],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  })
+
+});
+
+/*app.get('/userStatistics', (req, res) =>{
+  //query to get top speed of user
+  var query = `SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}' LIMIT 1;`;
+  
+  //query to get number of days of user
+  var q2 = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
+  db.task('get-everything', task => {
+    return task.batch([task.any(query), task.any(q2)]);
+  })
+  .then(data => {
+    console.log(data);
+    res.render('pages/home', {
+      query: data[0],
+      q2: data[1],
+    });
+  })
+  .catch(err => {
+    console.log(err);
+    res.status('400').json({
+      query: '',
+      q2: '',
+      error: err,
+    });
+  });
+});*/
+
+
+app.get('/stats', (req, res) => {
+    res.render('pages/stats');
+});
+  
+
+app.post('/stats', async (req, res) => {
+  try {
+    const { mountain, top_speed, reviewOption, reviewText, rating } = req.body;
+    console.error('Error', mountain, top_speed, reviewOption, reviewText, rating);
+    // Check if all required fields are present
+    if (!mountain || !top_speed || !reviewOption) {
+      return res.status(400).send('All fields are required.');
+    }  
+    // If reviewOption is 'yes', insert review into the reviews table
+    if (reviewOption === 'yes' && reviewText && rating) {
+      const {review_id} = await db.one('INSERT INTO reviews (description, rating) VALUES ($1, $2) RETURNING review_id', [reviewText, rating])
+      if(review_id) {
+        await db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
+      }
+    }
+  
+    const {ski_day_id} = await db.one('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2) RETURNING ski_day_id', [mountain, top_speed])
+    if(ski_day_id) {
+      await db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, $2)', [req.session.user.username, ski_day_id]);
+    }
+    await db.none('UPDATE users SET days_skied = days_skied + $1 WHERE username = $2', [1, req.session.user.username]);
+    await res.send('Your statistics have been submitted successfully.');
+  } catch (err){
+    console.error('Error:', error.message || error);
+    res.status(500).send(error.message || 'An error occurred while submitting.');
+  }
+});
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
