@@ -1,6 +1,6 @@
 INSERT INTO mountains (mountain_name, location) 
 VALUES ('Aspen Snowmass', 'Colorado, USA'), 
-('Arapahoe Basin', 'Colorado, USA', 2),
+('Arapahoe Basin', 'Colorado, USA'),
 ('Jackson Hole Mountain Resort', 'Wyoming, USA'),
 ('Big Sky Resort', 'Montana, USA'),
 ('Sun Valley', 'Idaho, USA'),
