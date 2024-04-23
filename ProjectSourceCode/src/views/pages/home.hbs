@@ -1,4 +1,20 @@
 <style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-image: url('/img/mountain1.jpg');
+        background-size: cover;
+        background-attachment: fixed;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
+    #content {
+        padding: 30px;
+        margin: 100px auto;
+        max-width: 1000px;
+        background-color: rgba(255, 255, 255, 0.5); /* Add a semi-transparent white background to make text readable */
+        text-align: center;
+    }
+
     .top3main {
         border-color: black;
         border-style: solid;
@@ -6,8 +22,8 @@
     }
     .lb_title {
         text-align: center;
-        border-style: double;
-        border-width: 5px;
+        border-style: solid;
+        border-width: 0px;
         border-color: black ;
     }
     .leaderboard {
@@ -15,10 +31,11 @@
         justify-content: space-around;
         padding-bottom: 40px;
         padding-top: 40px;
+        width: 600px
     }
     .leaderboard-item {
         text-align: center;
-        width: 20%;
+        width: 150px;
         background-color: #f0f0f0;
         padding: 20px;
         border-radius: 10px;
@@ -30,31 +47,27 @@
     .gold {
         background-color:  #CFB53B;
         z-index: 3; /* Ensure gold is on top */
-        right: -501px;
+        margin-top: 0px;
     }
     .silver {
         background-color: lightgrey;
         z-index: 2;
-        margin-top: 80px; /* Adjust position */
-        left: -501px;
+        margin-top: 40px; /* Adjust position */
     }
     .bronze {
         background-color: #bd7d3e;
         z-index: 1;
-        margin-top: 160px; /* Adjust position */
+        margin-top: 80px; /* Adjust position */
     }
     * {
         box-sizing: border-box;
     }
 
-    body {
-        font-family: Arial, Helvetica, sans-serif;
-    }
-
     .column {
         float: left;
-        width: 25%;
+        width: 250px;
         padding: 0 10px;
+        
     }
 
     /* Remove extra left and right margins, due to padding in columns */
@@ -73,29 +86,31 @@
         text-align: center;
         background-color: #f1f1f1;
         display: flex;
-        left: calc(105%);
+        left: calc(25%);
     }
 </style>
-
+<element id="content">
+<body>
 {{!-- Leaderboard displaying the top 3 users based on days skied --}}
 <div class="top3main">
 <h1 class="lb_title">Top 3 Users</h1>
     <div class="leaderboard">
         {{!-- {{#each TopUsers}} --}}
             {{!-- {{#if @index '===' 0}} --}}
-                <div class="leaderboard-item gold">
-                    <h2>{{u1.username}}</h2>
-                    <p>{{u1.days_skied}}</p>
+                <div class="leaderboard-item silver">
+                        <h5>{{u2.username}}</h5>
+                        <p>{{u2.days_skied}}</p>
                 </div>
+
             {{!-- {{else}}
                 {{#if @index '===' 1}} --}}
-                    <div class="leaderboard-item silver">
-                        <h2>{{u2.username}}</h2>
-                        <p>{{u2.days_skied}}</p>
+                <div class="leaderboard-item gold">
+                    <h5>{{u1.username}}</h5>
+                    <p>{{u1.days_skied}}</p>
                 </div>
                 {{!-- {{else}} --}}
                     <div class="leaderboard-item bronze">
-                        <h2>{{u3.username}}</h2>
+                        <h5>{{u3.username}}</h5>
                         <p>{{u3.days_skied}}</p>
                     </div>
                 {{!-- {{/if}}
@@ -107,22 +122,33 @@
 {{!-- Cards displaying averages of users in DB and current logged in user's averages --}}
 <div class="row">
   <div class="column">
-    <div class="card">Average:
-        <p>Top Speed: {{avg_ts.round}} mph</p>
-        <p>Days: {{avg_ds.round}}</p>
-        <p>Favorite Mountain: {{avg_favmnt.mountain_name}}</p>
+    <div class="card">
+        <h4>Average Stats</h4><br>
+        <h5>Top Speed </h5>
+        <p1> {{avg_ts.round}} mph</p1><br>
+        <h5>Days Skied</h5>
+        <p1> {{avg_ds.round}}</p1><br>
+        <h5>Favorite Mountain </h5>
+        <p1>{{avg_favmnt.mountain_name}}</p1>
     </div>
     
   </div>
   <div class="column">
-    <div class="card">{{username}}:
+    <div class="card">
+        <h4>{{username}}</h4><br>
         {{#if user_ts.max}}
-        <p>Top Speed: {{user_ts.max}}</p>
+        <h5>Top Speed </h5>
+        <p1>{{user_ts.max}}</p1><br>
         {{else}}
-        <p>Top Speed: No Data</p>
+        <h5>Top Speed </h5>
+        <p1>No Data</p1><br>
         {{/if}}
-        <p>Days: {{daysSkied.count}}</p>
-        <p>Favorite Mountain: {{user_favmnt.mountain_name}}</p>
+        <h5>Days Skied</h5>
+        <p1>{{daysSkied.count}}</p1><br>
+        <h5>Favorite Mountain</h5>
+        <p1> {{user_favmnt.mountain_name}}</p1><br>
     </div>
   </div>
 </div>
+</body>
+</element>
