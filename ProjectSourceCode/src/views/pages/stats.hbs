@@ -62,13 +62,13 @@
 <element id="content">
 <body class="h-100 d-flex flex-column">
     <!-- stats -->
-  <h1>Your Statistics</h1>
+  <h3>Your Statistics</h3>
 
   <div class="d-grid gap-2 col-6 mx-auto">
       <button id="showFormBtn" class="btn btn-secondary btn-lg btn-block">Add Statistics</button>
       <form action="/stats" method="POST" class="hidden" id="myForm" style="background-color: rgb(255, 255, 255); padding: 30px; ">
           <div class="form-group" style="padding-left: 13px;">
-            <label for="mountain" >Mountain</label>
+            <label for="mountain" >Mountain:</label>
             <select id="mountain" name="mountain" required>
               <option value="">Select a mountain...</option>
               <option value="Aspen Snowmass">Aspen Snowmass</option>
@@ -116,25 +116,19 @@
 
           <br>
           <div class="form-control" style="border: none;">
-            <label for="top_speed">Top speed</label><br>
+            <label for="top_speed">Top speed:</label>
             <input type="text" id="top_speed" name="top_speed" required size="5px">
-            <p style="display: inline-block;">mph</p>
-          </div>
-
-          <div class="form-control" style="border: none;">
-            <label for="daysSkied">Day(s) spent:</label> 
-            <input type="text" id="daysSkied" name="daysSkied" required size="5px">
           </div>
 
           <div class="form-control" style="border: none; padding-top: 20px;">
-            <label for="reviews">Leave a review?</label><br>
+            <label for="reviews">Review:</label>
             <select id="reviewOption" name="reviewOption" required>
               <option value="no">No</option>
               <option value="yes">Yes</option>
             </select><br>
             <textarea style="margin: 10px;" id="reviewText" name="reviewText" rows="4" cols="74" class="hidden" placeholder="Write your review..."></textarea><br>
             <div class="hidden" id="rate">
-              <label>Rating</label>
+              <label>Rating:</label>
               <div class="rating" id="rating">
                 <input type="radio" name="rating" value="10" id="10"><label for="10">☆</label>
                 <input type="radio" name="rating" value="9" id="9"><label for="9">☆</label>
