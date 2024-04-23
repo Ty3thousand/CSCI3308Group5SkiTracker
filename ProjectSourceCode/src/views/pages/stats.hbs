@@ -14,7 +14,7 @@
     #content {
       padding: 30px;
       margin: 100px auto;
-      min-width: 800px;
+      min-width: 1000px;
       max-width: 1000px;
       background-color: rgba(255, 255, 255, 0.5); /* Add a semi-transparent white background to make text readable */
       text-align: center;
@@ -62,7 +62,7 @@
 <element id="content">
 <body class="h-100 d-flex flex-column">
     <!-- stats -->
-  <h1>Your Statistics</h1>
+  <h1>Statistics</h1>
 
   <div class="d-grid gap-2 col-6 mx-auto">
       <button id="showFormBtn" class="btn btn-secondary btn-lg btn-block">Add Statistics</button>
@@ -126,7 +126,7 @@
               <option value="no">No</option>
               <option value="yes">Yes</option>
             </select><br>
-            <textarea style="margin: 10px;" id="reviewText" name="reviewText" rows="4" cols="74" class="hidden" placeholder="Write your review..."></textarea><br>
+            <textarea style="margin: 10px;" id="reviewText" name="reviewText" rows="4" cols="40" class="hidden" placeholder="Write your review..."></textarea><br>
             <div class="hidden" id="rate">
               <label>Rating</label>
               <div class="rating" id="rating">
