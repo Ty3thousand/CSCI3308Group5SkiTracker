@@ -35,5 +35,11 @@ After downloading the code do the following:
   <li>Open your browser and search: 'localhost:3000'</li>
   <li>Enjoy!</li>
 </ul>
+<h2>How to Run Tests:</h2>
+<ul>
+  <li>Make sure docker is open</li>
+  <li>Change docker web command from 'npm start' to 'npm run testandstart'</li>
+  <li>You can now check your docker console log and see if the test cases passed</li>
+</ul>
 <h2>Link to Application:</h2>
 The SkiTracker is not currently up on the cloud but after completing the steps to run locally use this link: http://localhost:3000/login
