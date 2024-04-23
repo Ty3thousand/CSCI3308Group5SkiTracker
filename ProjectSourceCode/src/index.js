@@ -199,8 +199,7 @@ app.post('/profile', async (req, res) => {
     // Update user information in the database
     const query = `
       UPDATE users 
-      SET username = '${req.body.username}', 
-          email = '${req.body.email}', 
+      SET email = '${req.body.email}', 
           password = '${hash}' 
       WHERE username = '${user.username}' 
       RETURNING *
@@ -211,11 +210,8 @@ app.post('/profile', async (req, res) => {
     
     // If the user is found
     if (data) {
-      const user = {
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password
-      };
+      user.email = req.body.email;
+        user.password = req.body.password;
       
       req.session.user = user;
       req.session.save();
@@ -428,7 +424,7 @@ app.post('/stats', (req, res) => {
     })
     .then(() => {
       if (reviewId) {    // If reviewId is not null, insert mountain into mountains_to_reviews 
-        return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
+        return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, review_id]);
       }
       return null;    // Otherwise just return with null
     })
