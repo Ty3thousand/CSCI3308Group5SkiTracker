@@ -385,7 +385,6 @@ app.get('/stats', (req, res) => {
     res.render('pages/stats');
 });
   
-
 app.post('/stats', async (req, res) => {
   try {
     const { mountain, top_speed, reviewOption, reviewText, rating } = req.body;

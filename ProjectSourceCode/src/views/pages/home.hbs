@@ -124,11 +124,11 @@
   <div class="column">
     <div class="card">
         <h4>Average Stats</h4><br>
-        <h5>Top Speed </h5>
+        <h5>Top Speed:</h5>
         <p1> {{avg_ts.round}} mph</p1><br>
-        <h5>Days Skied</h5>
+        <h5>Days Skied:</h5>
         <p1> {{avg_ds.round}}</p1><br>
-        <h5>Favorite Mountain </h5>
+        <h5>Favorite Mountain:</h5>
         <p1>{{avg_favmnt.mountain_name}}</p1>
     </div>
     
@@ -137,16 +137,22 @@
     <div class="card">
         <h4>{{username}}</h4><br>
         {{#if user_ts.max}}
-        <h5>Top Speed </h5>
+        <h5>Top Speed:</h5>
         <p1>{{user_ts.max}}</p1><br>
         {{else}}
-        <h5>Top Speed </h5>
+        <h5>Top Speed:</h5>
         <p1>No Data</p1><br>
         {{/if}}
-        <h5>Days Skied</h5>
+        <h5>Days Skied:</h5>
         <p1>{{daysSkied.count}}</p1><br>
-        <h5>Favorite Mountain</h5>
+        {{#if user_favmnt.mountain_name}}
+        <h5>Favorite Mountain:</h5>
         <p1> {{user_favmnt.mountain_name}}</p1><br>
+        {{else}}
+        <h5>Favorite Mountain:</h5>
+        <p1>No Data</p1><br>
+
+        {{/if}}
     </div>
   </div>
 </div>
