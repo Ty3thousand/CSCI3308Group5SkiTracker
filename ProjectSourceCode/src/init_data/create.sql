@@ -20,7 +20,6 @@ DROP TABLE IF EXISTS mountains CASCADE;
 CREATE TABLE IF NOT EXISTS mountains
 (
     mountain_name VARCHAR(50) PRIMARY KEY NOT NULL,
-    review_id INT NOT NULL,
     location VARCHAR(50)
 );
 
@@ -50,4 +49,3 @@ CREATE TABLE IF NOT EXISTS mountains_to_reviews
     FOREIGN KEY (mountain_name) REFERENCES mountains (mountain_name) ON DELETE CASCADE,
     FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
-

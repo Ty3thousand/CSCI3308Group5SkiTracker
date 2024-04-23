@@ -35,3 +35,5 @@ After downloading the code do the following:
   <li>Open your browser and search: 'localhost:3000'</li>
   <li>Enjoy!</li>
 </ul>
+<h2>Link to Application:</h2>
+The SkiTracker is not currently up on the cloud but after completing the steps to run locally use this link: http://localhost:3000/login
