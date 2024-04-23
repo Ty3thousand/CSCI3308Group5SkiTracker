@@ -1,5 +1,28 @@
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('/img/mountain1.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+        #content {
+            padding: 30px;
+            margin: 100px auto;
+            min-width: 800px;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.8); /* Add a semi-transparent white background to make text readable */
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+  <element id="content">
+  <h1>Popular Reviews</h1><br><br>
 <div>
-    <h1>Popular Reviews:</h1>
 
 <div id="carousel" class="carousel slide" data-bs-theme="dark" data-bs-ride="carousel" >
     <div class="carousel-inner">  
@@ -22,14 +45,14 @@
 </div>
 {{!-- Div for results --}}
 <div>
-    <br>
-<h1>Search for other mountain reviews!</h1>
+    <br><br><br>
+<h2>Search for other mountain reviews!</h2>
 <form method="post" action="/reviews">
   <div class="form-group">
-    <label for="mountain-search">Type the mountain you want to find reviews for here!</label>
-    <input class="form-control" id="mountainSearch" placeholder="Search for reviews by mountain here!" name="mountain">
+    <label for="mountain-search">Type the mountain you want to find reviews for here!</label><br><br>
+    <input class="form-control" id="mountainSearch" placeholder="Search for reviews by mountain here!" name="mountain"><br>
   
-  <button type="submit" class="btn btn-primary">Search</button>
+  <button type="submit" class="btn btn-primary">Search</button><br><br>
   </div>
   </form>
 
@@ -48,3 +71,6 @@
 </div>
 
 </div>
+</element>
+</body>
+

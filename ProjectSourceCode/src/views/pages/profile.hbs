@@ -1,3 +1,23 @@
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('/img/mountain1.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+        #content {
+            padding: 30px;
+            margin: 100px auto;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.8); /* Add a semi-transparent white background to make text readable */
+            text-align: center;
+        }
+    </style>
+    
+<element id=content>
+    <h1>Your Profile</h1><br>
     <table border="1" style="margin-left: 50px; margin-right: 50px;">
         <tr style="border-bottom: solid 0.25px; border-top: solid 0.25px;">
             <th>Email</th>
@@ -11,9 +31,9 @@
             <th>Password</th>
             <td>{{password}}</td>
         </tr>
-    </table>
+    </table><br><br><br>
     <div class="content">
-        <h1>Edit you information:</h1>
+        <h2>Edit your information</h2>
         <form action="/profile" method="POST">
             <label for="username">Username</label><br>
             <input type="username" id="username" name="username" required><br><br>
@@ -26,3 +46,4 @@
             <button type="submit">Update</button>
         </form>
     </div>
+</element>
