@@ -316,7 +316,7 @@ app.get("/logout", (req, res) => {
 app.get('/home', (req, res) =>{
   const userTopSpeed = `SELECT MAX(sd.top_speed) FROM users u JOIN user_to_ski_day usd ON u.username = usd.username JOIN ski_day sd ON usd.ski_day_id = sd.ski_day_id WHERE u.username = '${user.username}';`;
   const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC LIMIT 3;`
-  const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${user.username}') AS x;`;
+  const daysSkied = `SELECT days_skied FROM users WHERE username='${user.username}'`;
   const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${user.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
   const avg_ts = 'SELECT ROUND(AVG(top_speed), 2) FROM ski_day;';
   const avg_ds = 'SELECT ROUND(AVG(days_skied), 2) FROM users;';
@@ -405,7 +405,7 @@ app.post('/stats', async (req, res) => {
     if(ski_day_id) {
       await db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, $2)', [req.session.user.username, ski_day_id]);
     }
-    await db.none('UPDATE users SET days_skied = days_skied + $1 WHERE username = $2', [1, req.session.user.username]);
+    await db.none('UPDATE users SET days_skied = days_skied + $1 WHERE username = $2', [req.body.daysSkied, req.session.user.username]);
     await res.send('Your statistics have been submitted successfully.');
   } catch (err){
     console.error('Error:', error.message || error);
