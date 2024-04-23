@@ -199,8 +199,7 @@ app.post('/profile', async (req, res) => {
     // Update user information in the database
     const query = `
       UPDATE users 
-      SET username = '${req.body.username}', 
-          email = '${req.body.email}', 
+      SET email = '${req.body.email}', 
           password = '${hash}' 
       WHERE username = '${user.username}' 
       RETURNING *
@@ -211,11 +210,8 @@ app.post('/profile', async (req, res) => {
     
     // If the user is found
     if (data) {
-      const user = {
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password
-      };
+      user.email = req.body.email;
+        user.password = req.body.password;
       
       req.session.user = user;
       req.session.save();
@@ -318,10 +314,10 @@ app.get("/logout", (req, res) => {
 });*/
 
 app.get('/home', (req, res) =>{
-  const userTopSpeed = `SELECT MAX(sd.top_speed) FROM users u JOIN user_to_ski_day usd ON u.username = usd.username JOIN ski_day sd ON usd.ski_day_id = sd.ski_day_id WHERE u.username = '${req.body.username}';`;
+  const userTopSpeed = `SELECT MAX(sd.top_speed) FROM users u JOIN user_to_ski_day usd ON u.username = usd.username JOIN ski_day sd ON usd.ski_day_id = sd.ski_day_id WHERE u.username = '${user.username}';`;
   const TopUsers = `SELECT username, days_skied FROM users ORDER BY days_skied DESC LIMIT 3;`
-  const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${req.body.username}') AS x;`;
-  const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${req.body.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
+  const daysSkied = `SELECT count(*) FROM (SELECT username, top_speed FROM (SELECT user_to_ski_day.username, ski_day.top_speed FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id ORDER BY username, top_speed DESC) AS x WHERE username = '${user.username}') AS x;`;
+  const user_favmnt = `SELECT mountain_name, COUNT(*) AS num FROM (SELECT username, mountain_name FROM(SELECT user_to_ski_day.username, ski_day.mountain_name FROM user_to_ski_day FULL JOIN ski_day ON user_to_ski_day.ski_day_id = ski_day.ski_day_id) AS x WHERE username = '${user.username}') AS y GROUP BY mountain_name ORDER BY mountain_name ASC, COUNT(*) DESC LIMIT 1;`
   const avg_ts = 'SELECT ROUND(AVG(top_speed), 2) FROM ski_day;';
   const avg_ds = 'SELECT ROUND(AVG(days_skied), 2) FROM users;';
   const avg_favmnt = 'SELECT mountain_name FROM mountains_to_reviews GROUP BY mountain_name ORDER BY COUNT(*) DESC LIMIT 1;';
@@ -386,70 +382,36 @@ app.get('/home', (req, res) =>{
 
 
 app.get('/stats', (req, res) => {
-  res.render('pages/stats');
-  });
+    res.render('pages/stats');
+});
   
 
-app.post('/stats', (req, res) => {
-  const { mountain, top_speed, reviewOption, reviewText, rating } = req.body;
-  console.error('Error', mountain, top_speed, reviewOption, reviewText, rating);
-  // Check if all required fields are present
-  if (!mountain || !top_speed || !reviewOption) {
-    return res.status(400).send('All fields are required.');
-  }
-
-  // Initialize variables for review-related database operations
-  let reviewId = null;
-  let insertReviewPromise = Promise.resolve();
-  let skiday_id = null;
-
-  // If reviewOption is 'yes', insert review into the reviews table
-  if (reviewOption === 'yes' && reviewText && rating) {
-    insertReviewPromise = db.one('INSERT INTO reviews (description, rating) VALUES ($1, $2) RETURNING review_id', [reviewText, rating])
-      .then(data => {
-        reviewId = data.review_id;
-      })
-      .catch(error => {
-        console.error('Error inserting review:', error);
-        throw new Error('An error occurred while submitting your review.');
-      });
-  }
-
-  // Execute promises sequentially
-  insertReviewPromise
-    .then(() => {
-      // Insert user and ski day association into user_to_ski_day table
-      return db.any(`SELECT ski_day_id FROM ski_day WHERE mountain_name = '${mountain}';`)
-        .then(data => {
-          console.log(data)
-          if (data.length > 0) {
-            skiday_id = data[0].ski_day_id; // Assigning the ski_day_id from the first result
-          } else {
-            throw new Error('Ski day not found for the specified mountain.');
-          }
-        })
-        .then(() => {
-          return db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, $2)', [req.session.user.username, skiday_id]);
-        });
-    })
-    .then(() => {
-      if (reviewId) {    // If reviewId is not null, insert mountain into mountains_to_reviews 
-        return db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, reviewId]);
+app.post('/stats', async (req, res) => {
+  try {
+    const { mountain, top_speed, reviewOption, reviewText, rating } = req.body;
+    console.error('Error', mountain, top_speed, reviewOption, reviewText, rating);
+    // Check if all required fields are present
+    if (!mountain || !top_speed || !reviewOption) {
+      return res.status(400).send('All fields are required.');
+    }  
+    // If reviewOption is 'yes', insert review into the reviews table
+    if (reviewOption === 'yes' && reviewText && rating) {
+      const {review_id} = await db.one('INSERT INTO reviews (description, rating) VALUES ($1, $2) RETURNING review_id', [reviewText, rating])
+      if(review_id) {
+        await db.none('INSERT INTO mountains_to_reviews (mountain_name, review_id) VALUES ($1, $2)', [mountain, review_id]);
       }
-      return null;    // Otherwise just return with null
-    })
-    .then(() => {
-      // Insert ski day info into ski_day table
-      return db.none('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2)', [mountain, top_speed]);
-    })
-    .then(() => {
-      // Respond with a confirmation message or redirect the user to another page
-      res.send('Your statistics have been submitted successfully.');
-    })
-    .catch(error => {
-      console.error('Error:', error.message || error);
-      res.status(500).send(error.message || 'An error occurred while submitting.');
-    });
+    }
+  
+    const {ski_day_id} = await db.one('INSERT INTO ski_day (mountain_name, top_speed) VALUES ($1, $2) RETURNING ski_day_id', [mountain, top_speed])
+    if(ski_day_id) {
+      await db.none('INSERT INTO user_to_ski_day (username, ski_day_id) VALUES ($1, $2)', [req.session.user.username, ski_day_id]);
+    }
+    await db.none('UPDATE users SET days_skied = days_skied + $1 WHERE username = $2', [1, req.session.user.username]);
+    await res.send('Your statistics have been submitted successfully.');
+  } catch (err){
+    console.error('Error:', error.message || error);
+    res.status(500).send(error.message || 'An error occurred while submitting.');
+  }
 });
 
 // *****************************************************
