@@ -38,7 +38,7 @@ After downloading the code do the following:
 <h2>How to Run Tests:</h2>
 <ul>
   <li>Make sure docker is open</li>
-  <li>Change docker web command from 'npm start' to 'npm run testandstart'</li>
+  <li>Change docker web command from 'npm start' to 'npm run testandstart' in the docker-compose.yaml</li>
   <li>You can now check your docker console log and see if the test cases passed</li>
 </ul>
 <h2>Link to Application:</h2>
